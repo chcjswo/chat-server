@@ -39,33 +39,32 @@ public class JwtAuthFilter extends GenericFilter {
 	public void doFilter(final ServletRequest request,
 						 final ServletResponse response,
 						 final FilterChain filterChain) throws IOException, ServletException {
-		filterChain.doFilter(request, response);
-		// HttpServletRequest httpServletRequest = (HttpServletRequest)request;
-		// HttpServletResponse httpServletResponse = (HttpServletResponse)response;
-		// String token = httpServletRequest.getHeader("Authorization");
-		// try {
-		// 	if (token != null) {
-		// 		if (!token.substring(0, 7).equals("Bearer ")) {
-		// 			throw new AuthenticationServiceException("Bearer 형식이 아닙니다.");
-		// 		}
-		// 		String jwtToken = token.substring(7);
-		// 		Claims claims = Jwts.parserBuilder()
-		// 			.setSigningKey(secretKey)
-		// 			.build()
-		// 			.parseClaimsJws(jwtToken)
-		// 			.getBody();
-		// 		List<GrantedAuthority> authorities = new ArrayList<>();
-		// 		authorities.add(new SimpleGrantedAuthority("ROLE_" + claims.get("role")));
-		// 		UserDetails userDetails = new User(claims.getSubject(), "", authorities);
-		// 		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-		// 		SecurityContextHolder.getContext().setAuthentication(authentication);
-		// 	}
-		// 	filterChain.doFilter(request, response);
-		// } catch (Exception e) {
-		// 	e.printStackTrace();
-		// 	httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
-		// 	httpServletResponse.setContentType("application/json");
-		// 	httpServletResponse.getWriter().write("invalid token");
-		// }
+		HttpServletRequest httpServletRequest = (HttpServletRequest)request;
+		HttpServletResponse httpServletResponse = (HttpServletResponse)response;
+		String token = httpServletRequest.getHeader("Authorization");
+		try {
+			if (token != null) {
+				if (!token.startsWith("Bearer ")) {
+					throw new AuthenticationServiceException("Bearer 형식이 아닙니다.");
+				}
+				String jwtToken = token.substring(7);
+				Claims claims = Jwts.parserBuilder()
+					.setSigningKey(secretKey)
+					.build()
+					.parseClaimsJws(jwtToken)
+					.getBody();
+				List<GrantedAuthority> authorities = new ArrayList<>();
+				authorities.add(new SimpleGrantedAuthority("ROLE_" + claims.get("role")));
+				UserDetails userDetails = new User(claims.getSubject(), "", authorities);
+				Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+				SecurityContextHolder.getContext().setAuthentication(authentication);
+			}
+			filterChain.doFilter(request, response);
+		} catch (Exception e) {
+			e.printStackTrace();
+			httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+			httpServletResponse.setContentType("application/json");
+			httpServletResponse.getWriter().write("invalid token");
+		}
 	}
 }

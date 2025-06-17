@@ -1,5 +1,7 @@
 package me.mocadev.chatserver.member.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -7,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import me.mocadev.chatserver.member.domain.Member;
 import me.mocadev.chatserver.member.domain.Role;
+import me.mocadev.chatserver.member.dto.MemberListResponseDto;
 import me.mocadev.chatserver.member.dto.MemberLoginRequestDto;
 import me.mocadev.chatserver.member.dto.MemberSaveRequestDto;
 import me.mocadev.chatserver.member.repository.MemberRepository;
@@ -44,5 +47,18 @@ public class MemberService {
 			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
 		}
 		return member;
+	}
+
+	public List<MemberListResponseDto> findAll() {
+		List<Member> members = memberRepository.findAll();
+		List<MemberListResponseDto> memberListResDtos = new ArrayList<>();
+		for (Member m : members){
+			MemberListResponseDto memberListResDto = new MemberListResponseDto();
+			memberListResDto.setId(m.getId());
+			memberListResDto.setEmail(m.getEmail());
+			memberListResDto.setName(m.getName());
+			memberListResDtos.add(memberListResDto);
+		}
+		return memberListResDtos;
 	}
 }
