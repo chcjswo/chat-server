@@ -13,3 +13,6 @@ spring:
     generate-ddl: true
     show-sql: true
 
+jwt:
+  secretKey: YXNkZmtsYXNkbGtmamFvaXNldWxzYWtkZmxrc2NjeG5vaWFld2pybGFzamZsd2FldWpsa2FzZG1mbGF3ZXVsa2FzZmFlamZsYWtzZGZhc29pZGZqYWxzZGpmb2Fpd2VqZmxrYXNkamZsa2FzZGpm
+  expiration: 3000
