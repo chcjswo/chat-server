@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.mocadev.chatserver.chat.dto.ChatMessageDto;
+import me.mocadev.chatserver.chat.service.ChatService;
 
 /**
  * @author mc.jeon
@@ -22,6 +23,7 @@ import me.mocadev.chatserver.chat.dto.ChatMessageDto;
 public class StompController {
 
 	private final SimpMessageSendingOperations messageTemplate;
+	private final ChatService chatService;
 
 	// @MessageMapping("/{roomId}")
 	// @SendTo("/topic/{roomId}")
@@ -35,6 +37,7 @@ public class StompController {
 	public void sendMessage(@DestinationVariable Long roomId,
 							  ChatMessageDto chatMessageReqDto) throws JsonProcessingException {
 		log.info("chat message >> {}", chatMessageReqDto.getMessage());
+		chatService.saveMessage(roomId, chatMessageReqDto);
 		messageTemplate.convertAndSend("/topic/" + roomId, chatMessageReqDto);
 	}
 }
