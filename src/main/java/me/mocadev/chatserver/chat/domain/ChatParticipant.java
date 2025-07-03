@@ -21,7 +21,7 @@ import me.mocadev.chatserver.member.domain.Member;
 @AllArgsConstructor
 @Builder
 @Getter
-public class ChatParticipant  extends BaseTimeEntity {
+public class ChatParticipant extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)

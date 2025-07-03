@@ -25,7 +25,7 @@ import me.mocadev.chatserver.common.domain.BaseTimeEntity;
 @AllArgsConstructor
 @Builder
 @Getter
-public class ChatRoom  extends BaseTimeEntity {
+public class ChatRoom extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,7 +33,7 @@ public class ChatRoom  extends BaseTimeEntity {
 	@Column(nullable = false)
 	private String name;
 	@Builder.Default
-	private String isGroupChat="N";
+	private String isGroupChat = "N";
 
 	@OneToMany(mappedBy = "chatRoom", cascade = CascadeType.REMOVE)
 	private List<ChatParticipant> chatParticipants = new ArrayList<>();
