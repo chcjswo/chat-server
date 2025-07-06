@@ -2,6 +2,7 @@ package me.mocadev.chatserver.chat.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -85,10 +86,10 @@ public class ChatService {
 		chatParticipantRepository.save(chatParticipant);
 	}
 
-	public List<ChatRoomListResponseDto> getGroupChatRooms(){
+	public List<ChatRoomListResponseDto> getGroupChatRooms() {
 		List<ChatRoom> chatRooms = chatRoomRepository.findByIsGroupChat("Y");
 		List<ChatRoomListResponseDto> dtos = new ArrayList<>();
-		for(ChatRoom c : chatRooms){
+		for (ChatRoom c : chatRooms) {
 			ChatRoomListResponseDto dto = ChatRoomListResponseDto
 				.builder()
 				.roomId(c.getId())
@@ -97,5 +98,27 @@ public class ChatService {
 			dtos.add(dto);
 		}
 		return dtos;
+	}
+
+	public void addParticipantToGroupChat(Long roomId) {
+		ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("room cannot be found"));
+		Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+			.orElseThrow(() -> new EntityNotFoundException("member cannot be found"));
+		if (chatRoom.getIsGroupChat().equals("N")) {
+			throw new IllegalArgumentException("그룹채팅이 아닙니다.");
+		}
+		Optional<ChatParticipant> participant = chatParticipantRepository.findByChatRoomAndMember(chatRoom, member);
+		if (participant.isEmpty()) {
+			addParticipantToRoom(chatRoom, member);
+		}
+	}
+
+	private void addParticipantToRoom(ChatRoom chatRoom,
+									  Member member) {
+		ChatParticipant chatParticipant = ChatParticipant.builder()
+			.chatRoom(chatRoom)
+			.member(member)
+			.build();
+		chatParticipantRepository.save(chatParticipant);
 	}
 }
