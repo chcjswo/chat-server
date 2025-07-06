@@ -2,6 +2,7 @@ package me.mocadev.chatserver.chat.service;
 
 import java.util.List;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +41,8 @@ public class ChatService {
 
 	public void saveMessage(Long roomId,
 							ChatMessageDto chatMessageReqDto) {
-		ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new EntityNotFoundException("room cannot be found"));
+		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+			.orElseThrow(() -> new EntityNotFoundException("room cannot be found"));
 
 		Member sender = memberRepository.findByEmail(chatMessageReqDto.getSenderEmail())
 			.orElseThrow(() -> new EntityNotFoundException("member cannot be found"));
@@ -62,5 +64,22 @@ public class ChatService {
 				.build();
 			readStatusRepository.save(readStatus);
 		}
+	}
+
+	public void createGroupRoom(String chatRoomName) {
+		Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+			.orElseThrow(() -> new EntityNotFoundException("member cannot be found"));
+
+		ChatRoom chatRoom = ChatRoom.builder()
+			.name(chatRoomName)
+			.isGroupChat("Y")
+			.build();
+		chatRoomRepository.save(chatRoom);
+
+		ChatParticipant chatParticipant = ChatParticipant.builder()
+			.chatRoom(chatRoom)
+			.member(member)
+			.build();
+		chatParticipantRepository.save(chatParticipant);
 	}
 }
