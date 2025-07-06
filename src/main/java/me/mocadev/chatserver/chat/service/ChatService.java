@@ -1,5 +1,6 @@
 package me.mocadev.chatserver.chat.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,6 +12,7 @@ import me.mocadev.chatserver.chat.domain.ChatParticipant;
 import me.mocadev.chatserver.chat.domain.ChatRoom;
 import me.mocadev.chatserver.chat.domain.ReadStatus;
 import me.mocadev.chatserver.chat.dto.ChatMessageDto;
+import me.mocadev.chatserver.chat.dto.ChatRoomListResponseDto;
 import me.mocadev.chatserver.chat.repository.ChatMessageRepository;
 import me.mocadev.chatserver.chat.repository.ChatParticipantRepository;
 import me.mocadev.chatserver.chat.repository.ChatRoomRepository;
@@ -81,5 +83,19 @@ public class ChatService {
 			.member(member)
 			.build();
 		chatParticipantRepository.save(chatParticipant);
+	}
+
+	public List<ChatRoomListResponseDto> getGroupChatRooms(){
+		List<ChatRoom> chatRooms = chatRoomRepository.findByIsGroupChat("Y");
+		List<ChatRoomListResponseDto> dtos = new ArrayList<>();
+		for(ChatRoom c : chatRooms){
+			ChatRoomListResponseDto dto = ChatRoomListResponseDto
+				.builder()
+				.roomId(c.getId())
+				.roomName(c.getName())
+				.build();
+			dtos.add(dto);
+		}
+		return dtos;
 	}
 }
