@@ -160,4 +160,15 @@ public class ChatService {
 		}
 		return chatMessageDtos;
 	}
+
+	public void messageRead(Long roomId) {
+		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+			.orElseThrow(() -> new EntityNotFoundException("room cannot be found"));
+		Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+			.orElseThrow(() -> new EntityNotFoundException("member cannot be found"));
+		List<ReadStatus> readStatuses = readStatusRepository.findByChatRoomAndMember(chatRoom, member);
+		for (ReadStatus r : readStatuses) {
+			r.updateIsRead(true);
+		}
+	}
 }
