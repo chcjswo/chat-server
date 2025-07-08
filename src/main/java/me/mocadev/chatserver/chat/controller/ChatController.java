@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
+import me.mocadev.chatserver.chat.dto.ChatMessageDto;
 import me.mocadev.chatserver.chat.dto.ChatRoomListResponseDto;
 import me.mocadev.chatserver.chat.service.ChatService;
 
@@ -41,5 +42,11 @@ public class ChatController {
 	public ResponseEntity<?> joinGroupChatRoom(@PathVariable Long roomId){
 		chatService.addParticipantToGroupChat(roomId);
 		return ResponseEntity.ok().build();
+	}
+
+	@GetMapping("/history/{roomId}")
+	public ResponseEntity<?> getChatHistory(@PathVariable Long roomId){
+		List<ChatMessageDto> chatMessageDtos = chatService.getChatHistory(roomId);
+		return new ResponseEntity<>(chatMessageDtos, HttpStatus.OK);
 	}
 }
