@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import me.mocadev.chatserver.chat.dto.ChatMessageDto;
 import me.mocadev.chatserver.chat.dto.ChatRoomListResponseDto;
+import me.mocadev.chatserver.chat.dto.MyChatListResponseDto;
 import me.mocadev.chatserver.chat.service.ChatService;
 
 /**
@@ -54,5 +55,11 @@ public class ChatController {
 	public ResponseEntity<?> messageRead(@PathVariable Long roomId) {
 		chatService.messageRead(roomId);
 		return ResponseEntity.ok().build();
+	}
+
+	@GetMapping("/my/rooms")
+	public ResponseEntity<?> getMyChatRooms(){
+		List<MyChatListResponseDto> myChatListResDtos = chatService.getMyChatRooms();
+		return new ResponseEntity<>(myChatListResDtos, HttpStatus.OK);
 	}
 }
