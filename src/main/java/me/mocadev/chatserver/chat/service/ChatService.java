@@ -191,21 +191,44 @@ public class ChatService {
 		return chatListResDtos;
 	}
 
-	public void leaveGroupChatRoom(Long roomId){
+	public void leaveGroupChatRoom(Long roomId) {
 		ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-			.orElseThrow(()-> new EntityNotFoundException("room cannot be found"));
+			.orElseThrow(() -> new EntityNotFoundException("room cannot be found"));
 		Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
-			.orElseThrow(()->new EntityNotFoundException("member cannot be found"));
-		if(chatRoom.getIsGroupChat().equals("N")){
+			.orElseThrow(() -> new EntityNotFoundException("member cannot be found"));
+		if (chatRoom.getIsGroupChat().equals("N")) {
 			throw new IllegalArgumentException("단체 채팅방이 아닙니다.");
 		}
 		ChatParticipant c = chatParticipantRepository.findByChatRoomAndMember(chatRoom, member)
-			.orElseThrow(()->new EntityNotFoundException("참여자를 찾을 수 없습니다."));
+			.orElseThrow(() -> new EntityNotFoundException("참여자를 찾을 수 없습니다."));
 		chatParticipantRepository.delete(c);
 
 		List<ChatParticipant> chatParticipants = chatParticipantRepository.findByChatRoom(chatRoom);
-		if(chatParticipants.isEmpty()){
+		if (chatParticipants.isEmpty()) {
 			chatRoomRepository.delete(chatRoom);
 		}
+	}
+
+	public Long getOrCreatePrivateRoom(Long otherMemberId) {
+		Member member = memberRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
+			.orElseThrow(() -> new EntityNotFoundException("member cannot be found"));
+		Member otherMember = memberRepository.findById(otherMemberId)
+			.orElseThrow(() -> new EntityNotFoundException("member cannot be found"));
+
+		Optional<ChatRoom> chatRoom = chatParticipantRepository.findExistingPrivateRoom(member.getId(), otherMember.getId());
+		if (chatRoom.isPresent()) {
+			return chatRoom.get().getId();
+		}
+
+		ChatRoom newRoom = ChatRoom.builder()
+			.isGroupChat("N")
+			.name(member.getName() + "-" + otherMember.getName())
+			.build();
+		chatRoomRepository.save(newRoom);
+
+		addParticipantToRoom(newRoom, member);
+		addParticipantToRoom(newRoom, otherMember);
+
+		return newRoom.getId();
 	}
 }
