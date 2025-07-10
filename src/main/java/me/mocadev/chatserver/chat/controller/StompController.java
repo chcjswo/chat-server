@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.mocadev.chatserver.chat.dto.ChatMessageDto;
 import me.mocadev.chatserver.chat.service.ChatService;
+import me.mocadev.chatserver.chat.service.RedisPubSubService;
 
 /**
  * @author mc.jeon
@@ -24,6 +25,8 @@ public class StompController {
 
 	private final SimpMessageSendingOperations messageTemplate;
 	private final ChatService chatService;
+	private final RedisPubSubService redisPubSubService;
+	private final ObjectMapper objectMapper;
 
 	// @MessageMapping("/{roomId}")
 	// @SendTo("/topic/{roomId}")
@@ -35,9 +38,11 @@ public class StompController {
 
 	@MessageMapping("/{roomId}")
 	public void sendMessage(@DestinationVariable Long roomId,
-							  ChatMessageDto chatMessageReqDto) throws JsonProcessingException {
-		log.info("chat message >> {}", chatMessageReqDto.getMessage());
-		chatService.saveMessage(roomId, chatMessageReqDto);
-		messageTemplate.convertAndSend("/topic/" + roomId, chatMessageReqDto);
+							ChatMessageDto chatMessageRequestDto) throws JsonProcessingException {
+		log.info("chat message >> {}", chatMessageRequestDto.getMessage());
+		chatService.saveMessage(roomId, chatMessageRequestDto);
+		chatMessageRequestDto.setRoomId(roomId);
+		// messageTemplate.convertAndSend("/topic/" + roomId, chatMessageRequestDto);
+		redisPubSubService.publish("chat", objectMapper.writeValueAsString(chatMessageRequestDto));
 	}
 }
